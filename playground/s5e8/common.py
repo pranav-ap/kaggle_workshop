@@ -1,11 +1,14 @@
+import os
+import warnings
 from dataclasses import dataclass
+from typing import Optional, Tuple
 
+import numpy as np
 import polars as pl
-
+import xgboost as xgb
 from prefect import task
 from prefect.assets import materialize
-
-import warnings
+import matplotlib.pyplot as plt
 
 warnings.filterwarnings('ignore')
 
@@ -51,17 +54,75 @@ def train_val_split(data: pl.DataFrame):
 
 
 @task
-def process_data(data: pl.DataFrame):
+def process_data(data: pl.DataFrame, stage='train') -> Tuple[np.array, np.array]:
+    ids = data['id'].to_numpy()
+
     columns_to_drop = ['id', 'day', 'month', 'contact']
     data = data.drop(columns_to_drop)
 
-    cat_cols = [
-        'job', 'marital', 'education', 'default', 'housing', 'loan', 'poutcome', 'y'
-    ]
+    cat_cols = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'poutcome', 'y']
+
+    if stage == 'test':
+        cat_cols.remove('y')
 
     data = data.with_columns([
-        pl.col(c).cast(pl.Categorical) for c in cat_cols
+        pl.col(c)
+        .cast(pl.Categorical)
+        .to_physical()
+        .cast(pl.Int32)
+        for c in cat_cols
     ])
 
-    return data
+    if stage == 'test':
+        X = data.to_numpy()
+        return ids, X
+
+    X = data.drop("y").to_numpy()
+    y = data["y"].to_numpy()
+
+    return X, y
+
+
+@materialize(f"file:///{Config.REPO_PATH}/outputs/s5e8/xgb_model.json")
+def save_model(model: xgb.XGBClassifier):
+    model_path = os.path.join(Config.REPO_PATH, "outputs", "s5e8", "xgb_model.json")
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    model.save_model(model_path)
+    return model_path
+
+
+@materialize(f"file:///{Config.REPO_PATH}/outputs/s5e8/xgb_model.json")
+def load_model() -> xgb.XGBClassifier:
+    model_path = os.path.join(Config.REPO_PATH, "outputs", "s5e8", "xgb_model.json")
+    model = xgb.XGBClassifier()
+    model.load_model(model_path)
+    return model
+
+
+@materialize(
+    f"file:///{Config.REPO_PATH}/outputs/s5e8/xgb_logloss.png",
+    log_prints=True,
+)
+def plot_charts(model: xgb.XGBClassifier):
+    results = model.evals_result()
+    epochs = len(results['validation_0']['logloss'])
+    x_axis = range(0, epochs)
+
+    # Log Loss plot
+
+    fig, ax = plt.subplots()
+    ax.plot(x_axis, results['validation_0']['logloss'], label='Train')
+    ax.plot(x_axis, results['validation_1']['logloss'], label='Validation')
+    ax.legend()
+    plt.xlabel("Epoch")
+    plt.ylabel("Log Loss")
+    plt.title("XGBoost Log Loss")
+
+    plot_path = os.path.join(Config.REPO_PATH, "outputs", "s5e8", "xgb_logloss.png")
+    os.makedirs(os.path.dirname(plot_path), exist_ok=True)
+    plt.savefig(plot_path)
+    plt.close(fig)
+    print(f"Saved log loss plot at {plot_path}")
+
+    return
 

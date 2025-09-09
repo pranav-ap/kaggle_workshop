@@ -1,0 +1,26 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python .\preprocess.py
+    deps:
+    - path: ..\..\data\playground-series-s5e9\test.csv
+      hash: md5
+      md5: 24d6929a3351c3a71fc6d05c8c8a940f
+      size: 18873000
+    - path: ..\..\data\playground-series-s5e9\train.csv
+      hash: md5
+      md5: 00fb07859ff3f2788c9d2ed4f4fd4b79
+      size: 61825031
+    - path: preprocess.py
+      hash: md5
+      md5: 10a61ac33f7cb2122b82540892a64ade
+      size: 1353
+    outs:
+    - path: ..\..\data\playground-series-s5e9\train_split.csv
+      hash: md5
+      md5: 13c68d7133d42d570174cf9a9691c816
+      size: 46404469
+    - path: ..\..\data\playground-series-s5e9\val_split.csv
+      hash: md5
+      md5: bfc732566ee2405648599ae41b7836ed
+      size: 11601408
