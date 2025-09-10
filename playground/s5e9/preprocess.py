@@ -1,19 +1,5 @@
-import numpy as np
 import polars as pl
-from dataclasses import dataclass
-
-
-@dataclass
-class Config:
-    REPO_PATH: str = 'D:/code/kaggle_workshop'
-
-    TRAIN_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/train.csv'
-    TEST_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/test.csv'
-    TRAIN_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/train_split.csv'
-    VAL_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/val_split.csv'
-
-    VAL_FRACTION: float = 0.2
-    RANDOM_SEED: int = 42
+from common import Config
 
 
 def train_val_split(data: pl.DataFrame):

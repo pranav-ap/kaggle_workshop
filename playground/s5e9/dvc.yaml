@@ -8,3 +8,16 @@ stages:
     outs:
     - ..\..\data\playground-series-s5e9\train_split.csv
     - ..\..\data\playground-series-s5e9\val_split.csv
+  train:
+    cmd: python .\train.py
+    deps:
+    - ..\..\data\playground-series-s5e9\train_split.csv
+    - ..\..\data\playground-series-s5e9\val_split.csv
+    - preprocess.py
+    outs:
+    - ..\..\outputs\s5e9\xgb_model.json
+    metrics:
+    - ..\..\outputs\s5e9\metrics.json:
+        cache: false
+    params:
+    - train.n_estimators

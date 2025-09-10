@@ -13,8 +13,8 @@ stages:
       size: 61825031
     - path: preprocess.py
       hash: md5
-      md5: 10a61ac33f7cb2122b82540892a64ade
-      size: 1353
+      md5: 6f9dd6605a21f453a246a71f0488b8fc
+      size: 846
     outs:
     - path: ..\..\data\playground-series-s5e9\train_split.csv
       hash: md5
@@ -24,3 +24,30 @@ stages:
       hash: md5
       md5: bfc732566ee2405648599ae41b7836ed
       size: 11601408
+  train:
+    cmd: python .\train.py
+    deps:
+    - path: ..\..\data\playground-series-s5e9\train_split.csv
+      hash: md5
+      md5: 13c68d7133d42d570174cf9a9691c816
+      size: 46404469
+    - path: ..\..\data\playground-series-s5e9\val_split.csv
+      hash: md5
+      md5: bfc732566ee2405648599ae41b7836ed
+      size: 11601408
+    - path: preprocess.py
+      hash: md5
+      md5: 6f9dd6605a21f453a246a71f0488b8fc
+      size: 846
+    params:
+      params.yaml:
+        train.n_estimators: 500
+    outs:
+    - path: ..\..\outputs\s5e9\metrics.json
+      hash: md5
+      md5: 6ca4225d3786bd69a048cac7f45a0ce2
+      size: 163
+    - path: ..\..\outputs\s5e9\xgb_model.json
+      hash: md5
+      md5: 94f68dde2701bcb3bcbf3c57b34d52cc
+      size: 3620179
