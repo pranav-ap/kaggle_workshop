@@ -41,13 +41,13 @@ stages:
       size: 846
     params:
       params.yaml:
-        train.n_estimators: 500
+        train.n_estimators: 10
     outs:
     - path: ..\..\outputs\s5e9\metrics.json
       hash: md5
-      md5: 6ca4225d3786bd69a048cac7f45a0ce2
-      size: 163
+      md5: 76adf77c3b3f068fda06058502586a43
+      size: 164
     - path: ..\..\outputs\s5e9\xgb_model.json
       hash: md5
-      md5: 94f68dde2701bcb3bcbf3c57b34d52cc
-      size: 3620179
+      md5: 69a833f0b6c8a8f14a5d6fa5a5f667ec
+      size: 73703
