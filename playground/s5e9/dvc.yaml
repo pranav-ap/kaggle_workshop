@@ -8,16 +8,26 @@ stages:
     outs:
     - ..\..\data\playground-series-s5e9\train_split.csv
     - ..\..\data\playground-series-s5e9\val_split.csv
+  tune:
+    cmd: python .\tune.py
+    deps:
+    - ..\..\data\playground-series-s5e9\train_split.csv
+    - tune.py
+    outs:
+    - ..\..\outputs\s5e9\best_params.yaml
   train:
     cmd: python .\train.py
     deps:
-    - ..\..\data\playground-series-s5e9\train_split.csv
-    - ..\..\data\playground-series-s5e9\val_split.csv
-    - preprocess.py
+    - ..\..\data\playground-series-s5e9\train.csv
+    - ..\..\outputs\s5e9\best_params.yaml
+    - train.py
     outs:
     - ..\..\outputs\s5e9\xgb_model.json
+  validate:
+    cmd: python .\validate.py
+    deps:
+    - ..\..\data\playground-series-s5e9\val_split.csv
+    - ..\..\outputs\s5e9\xgb_model.json
+    - validate.py
     metrics:
-    - ..\..\outputs\s5e9\metrics.json:
-        cache: false
-    params:
-    - train.n_estimators
+    - ..\..\outputs\s5e9\metrics.yaml

@@ -13,8 +13,8 @@ def train_val_split(data: pl.DataFrame):
 
 
 def main():
-    train_data = pl.read_csv('../../data/playground-series-s5e9/train.csv')
-    test_data = pl.read_csv('../../data/playground-series-s5e9/test.csv')
+    train_data = pl.read_csv(f'../../data/playground-series-{Config.PROJECT_NAME}/train.csv')
+    test_data = pl.read_csv(f'../../data/playground-series-{Config.PROJECT_NAME}/test.csv')
 
     columns_to_drop = ['id']
     train_data = train_data.drop(columns_to_drop)

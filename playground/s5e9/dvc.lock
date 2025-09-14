@@ -13,8 +13,8 @@ stages:
       size: 61825031
     - path: preprocess.py
       hash: md5
-      md5: 6f9dd6605a21f453a246a71f0488b8fc
-      size: 846
+      md5: 92de96150a4753fb99ca3c2ec2b939a7
+      size: 880
     outs:
     - path: ..\..\data\playground-series-s5e9\train_split.csv
       hash: md5
@@ -27,27 +27,56 @@ stages:
   train:
     cmd: python .\train.py
     deps:
+    - path: ..\..\data\playground-series-s5e9\train.csv
+      hash: md5
+      md5: 00fb07859ff3f2788c9d2ed4f4fd4b79
+      size: 61825031
+    - path: ..\..\outputs\s5e9\best_params.yaml
+      hash: md5
+      md5: 4d65dacb143126ccdc3fd82bd2afcef9
+      size: 209
+    - path: train.py
+      hash: md5
+      md5: 6d63a333512ead32ffe2bb3fcf52bedb
+      size: 888
+    outs:
+    - path: ..\..\outputs\s5e9\xgb_model.json
+      hash: md5
+      md5: e1be4c5fe25b9d53e41574a79690fd78
+      size: 19205922
+  tune:
+    cmd: python .\tune.py
+    deps:
     - path: ..\..\data\playground-series-s5e9\train_split.csv
       hash: md5
       md5: 13c68d7133d42d570174cf9a9691c816
       size: 46404469
+    - path: tune.py
+      hash: md5
+      md5: 582f1e5013c38d6913c178232a23f8d6
+      size: 2032
+    outs:
+    - path: ..\..\outputs\s5e9\best_params.yaml
+      hash: md5
+      md5: 4d65dacb143126ccdc3fd82bd2afcef9
+      size: 209
+  validate:
+    cmd: python .\validate.py
+    deps:
     - path: ..\..\data\playground-series-s5e9\val_split.csv
       hash: md5
       md5: bfc732566ee2405648599ae41b7836ed
       size: 11601408
-    - path: preprocess.py
-      hash: md5
-      md5: 6f9dd6605a21f453a246a71f0488b8fc
-      size: 846
-    params:
-      params.yaml:
-        train.n_estimators: 10
-    outs:
-    - path: ..\..\outputs\s5e9\metrics.json
-      hash: md5
-      md5: 76adf77c3b3f068fda06058502586a43
-      size: 164
     - path: ..\..\outputs\s5e9\xgb_model.json
       hash: md5
-      md5: 69a833f0b6c8a8f14a5d6fa5a5f667ec
-      size: 73703
+      md5: e1be4c5fe25b9d53e41574a79690fd78
+      size: 19205922
+    - path: validate.py
+      hash: md5
+      md5: 8be6ba9875fe7de73aa5c2ae992c0587
+      size: 879
+    outs:
+    - path: ..\..\outputs\s5e9\metrics.yaml
+      hash: md5
+      md5: 55055bdae0f05116eb4e2bc778a2aec5
+      size: 95
