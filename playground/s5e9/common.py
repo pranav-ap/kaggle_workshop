@@ -1,24 +1,23 @@
 import os
-import warnings
 from dataclasses import dataclass
 from typing import Tuple
+from pathlib import Path
 
 import numpy as np
 import polars as pl
 import xgboost as xgb
-import matplotlib.pyplot as plt
-
-warnings.filterwarnings('ignore')
+import yaml
 
 
 @dataclass
 class Config:
-    REPO_PATH: str = 'D:/code/kaggle_workshop'
+    REPO_PATH: Path = Path('D:/code/kaggle_workshop')
+    PROJECT_NAME: str = 's5e9'
 
-    TRAIN_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/train.csv'
-    TEST_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/test.csv'
-    TRAIN_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/train_split.csv'
-    VAL_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-s5e9/val_split.csv'
+    TRAIN_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-{PROJECT_NAME}/train.csv'
+    TEST_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-{PROJECT_NAME}/test.csv'
+    TRAIN_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-{PROJECT_NAME}/train_split.csv'
+    VAL_SPLIT_CSV_PATH: str = f'{REPO_PATH}/data/playground-series-{PROJECT_NAME}/val_split.csv'
 
     VAL_FRACTION: float = 0.2
     RANDOM_SEED: int = 42
@@ -50,38 +49,44 @@ def load_val_split_data() -> Tuple[np.array, np.array]:
     return X_val, y_val
 
 
-def save_model(model: xgb.XGBRegressor):
-    model_path = os.path.join(Config.REPO_PATH, "outputs", "s5e9", "xgb_model.json")
+def save_model(model: xgb.Booster):
+    model_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "xgb_model.json"
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     model.save_model(model_path)
     return model_path
 
 
-def load_model() -> xgb.XGBRegressor:
-    model_path = os.path.join(Config.REPO_PATH, "outputs", "s5e9", "xgb_model.json")
-    model = xgb.XGBRegressor()
+def load_model() -> xgb.Booster:
+    model_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "xgb_model.json"
+    model = xgb.Booster()
     model.load_model(model_path)
     return model
 
 
-def plot_charts(model: xgb.XGBRegressor):
-    results = model.evals_result()
-    epochs = len(results['validation_0']['rmse'])
-    x_axis = range(0, epochs)
+def store_best_params(best_params):
+    best_params_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "best_params.yaml"
+    with open(best_params_path, "w") as f:
+        yaml.dump(best_params, f, sort_keys=False, default_flow_style=False)
 
-    # RMSE plot
-    fig, ax = plt.subplots()
-    ax.plot(x_axis, results['validation_0']['rmse'], label='Train')
-    ax.plot(x_axis, results['validation_1']['rmse'], label='Validation')
-    ax.legend()
-    plt.xlabel("Epoch")
-    plt.ylabel("RMSE")
-    plt.title("XGBoost RMSE")
 
-    plot_path = os.path.join(Config.REPO_PATH, "outputs", "s5e9", "xgb_rmse.png")
-    os.makedirs(os.path.dirname(plot_path), exist_ok=True)
-    plt.savefig(plot_path, bbox_inches="tight")
-    plt.close(fig)
-    print(f"Saved RMSE plot at {plot_path}")
+def load_best_params():
+    best_params_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "best_params.yaml"
+    with open(best_params_path, "r") as f:
+        params = yaml.safe_load(f)
 
-    return
+    return params
+
+
+def store_metrics(metrics: dict):
+    metrics_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "metrics.yaml"
+    with open(metrics_path, "w") as f:
+        yaml.dump(metrics, f, sort_keys=False, default_flow_style=False)
+
+
+def load_metrics():
+    metrics_path = Config.REPO_PATH / "outputs" / Config.PROJECT_NAME / "metrics.yaml"
+    with open(metrics_path, "r") as f:
+        metrics = yaml.safe_load(f)
+
+    return metrics
+
