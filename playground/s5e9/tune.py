@@ -61,7 +61,7 @@ def describe_study(study):
 
 def run_optuna():
     study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=750)
+    study.optimize(objective, n_trials=200, timeout=60*10, n_jobs=-1)
     describe_study(study)
     return study
 
